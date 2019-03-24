@@ -2,10 +2,10 @@ package server
 
 import (
 	"github.com/gilcrest/alice"
+	"github.com/gilcrest/env/datastore"
 	"github.com/gilcrest/errors"
 	"github.com/gilcrest/httplog"
 	"github.com/gilcrest/servertoken"
-	"github.com/gilcrest/srvr/datastore"
 )
 
 // routes registers handlers to the router

@@ -3,16 +3,16 @@ package server
 import (
 	"net/http"
 
+	"github.com/gilcrest/env"
+	"github.com/gilcrest/env/datastore"
 	"github.com/gilcrest/errors"
-	"github.com/gilcrest/srvr"
-	"github.com/gilcrest/srvr/datastore"
 	"github.com/rs/zerolog"
 )
 
-// Server struct is a pointer to srvr.Server
-// allows additional local methods to be added
+// Server struct contains the environment (env.Env) and additional methods
+// for running our HTTP server
 type Server struct {
-	*srvr.Server
+	*env.Env
 }
 
 // handleRespHeader middleware is used to add standard HTTP response headers
@@ -26,18 +26,18 @@ func (s *Server) handleRespHeader(h http.Handler) http.Handler {
 
 // NewServer is a constructor for the Server struct
 // Sets up the struct and registers routes
-func NewServer(lvl zerolog.Level) (*Server, error) {
+func NewServer(name env.Name, lvl zerolog.Level) (*Server, error) {
 	const op errors.Op = "server/NewServer"
 
-	// call constructor for Server struct from srvr module
-	srvr, err := srvr.NewServer(lvl)
+	// call constructor for Env struct from env module
+	env, err := env.NewEnv(name, lvl)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	// Use type embedding to make srvr.Server struct part of
+	// Use type embedding to make env.Env struct part of
 	// local Server struct
-	server := &Server{srvr}
+	server := &Server{env}
 
 	// Use Datastore(DS) Option method to initialize logging
 	// database
