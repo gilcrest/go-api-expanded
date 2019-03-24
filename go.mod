@@ -8,6 +8,6 @@ require (
 	github.com/gilcrest/errors v0.13.1
 	github.com/gilcrest/httplog v0.7.0
 	github.com/gilcrest/movie v0.5.0
-	github.com/gilcrest/servertoken v0.3.0
+	github.com/gilcrest/servertoken v0.4.1
 	github.com/rs/zerolog v1.13.0
 )
