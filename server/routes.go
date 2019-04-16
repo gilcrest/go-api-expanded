@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gilcrest/alice"
 	"github.com/gilcrest/env/datastore"
 	"github.com/gilcrest/errors"
@@ -45,7 +47,7 @@ func (s *Server) routes() error {
 	s.Router.Handle("/v1/alice/movie",
 		alice.New(
 			httplog.LogHandler(s.Logger, logdb, opts),
-			s.handleRespHeader,
+			s.handleStdResponseHeader,
 			servertoken.Handler(s.Logger, appdb)).
 			ThenFunc(s.handlePost())).
 		Methods("POST").
@@ -68,4 +70,13 @@ func (s *Server) routes() error {
 		Headers("Content-Type", "application/json")
 
 	return nil
+}
+
+// handleStdResponseHeader middleware is used to add standard HTTP response headers
+func (s *Server) handleStdResponseHeader(h http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "application/json")
+			h.ServeHTTP(w, r) // call original
+		})
 }

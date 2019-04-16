@@ -1,8 +1,6 @@
 package server
 
 import (
-	"net/http"
-
 	"github.com/gilcrest/env"
 	"github.com/gilcrest/env/datastore"
 	"github.com/gilcrest/errors"
@@ -13,15 +11,6 @@ import (
 // for running our HTTP server
 type Server struct {
 	*env.Env
-}
-
-// handleRespHeader middleware is used to add standard HTTP response headers
-func (s *Server) handleRespHeader(h http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Add("Content-Type", "application/json")
-			h.ServeHTTP(w, r) // call original
-		})
 }
 
 // NewServer is a constructor for the Server struct
@@ -35,12 +24,10 @@ func NewServer(name env.Name, lvl zerolog.Level) (*Server, error) {
 		return nil, errors.E(op, err)
 	}
 
-	// Use type embedding to make env.Env struct part of
-	// local Server struct
+	// Use type embedding to make env.Env struct part of Server struct
 	server := &Server{env}
 
-	// Use Datastore(DS) Option method to initialize logging
-	// database
+	// Use Datastore(DS) Option method to initialize logging database
 	err = server.DS.Option(datastore.InitLogDB())
 	if err != nil {
 		return nil, errors.E(op, err)

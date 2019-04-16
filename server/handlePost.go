@@ -29,18 +29,10 @@ func (s *Server) handlePost() http.HandlerFunc {
 
 		// response is the expected service response fields
 		type response struct {
-			Title           string         `json:"Title"`
-			Year            int            `json:"Year"`
-			Rated           string         `json:"Rated"`
-			Released        string         `json:"ReleaseDate"`
-			RunTime         int            `json:"RunTime"`
-			Director        string         `json:"Director"`
-			Writer          string         `json:"Writer"`
+			request
 			CreateTimestamp string         `json:"CreateTimestamp"`
 			Audit           *httplog.Audit `json:"audit"`
 		}
-
-		const dateFormat string = "Jan 02 2006"
 
 		// retrieve the context from the http.Request
 		ctx := req.Context()
@@ -58,7 +50,7 @@ func (s *Server) handlePost() http.HandlerFunc {
 
 		// Declare rqst as an instance of request
 		// Decode JSON HTTP request body into a Decoder type
-		//  and unmarshal that into rqst
+		// and unmarshal that into rqst
 		rqst := new(request)
 		err = json.NewDecoder(req.Body).Decode(&rqst)
 		defer req.Body.Close()
@@ -68,7 +60,11 @@ func (s *Server) handlePost() http.HandlerFunc {
 			return
 		}
 
-		// declare a new instance of usr.User
+		// dateFormat is the expected date format for any date fields
+		// in the request
+		const dateFormat string = "Jan 02 2006"
+
+		// declare a new instance of movie.Movie
 		movie := new(movie.Movie)
 		movie.Title = rqst.Title
 		movie.Year = rqst.Year
@@ -101,9 +97,8 @@ func (s *Server) handlePost() http.HandlerFunc {
 		if err != nil {
 			// log error
 			s.Logger.Error().Err(err).Str("RequestID", aud.RequestID).Msg("")
-			// All errors should be an errors.Error type
-			// Use Kind, Code and Error from lower level errors to populate
-			// RE (Response Error)
+			// Type assertion is used - all errors should be an *errors.Error type
+			// Use Kind, Param, Code and Error from lower level errors to populate RE (Response Error)
 			if e, ok := err.(*errors.Error); ok {
 				err := errors.RE(http.StatusBadRequest, e.Kind, e.Param, e.Code, err)
 				errors.HTTPError(w, err)
@@ -116,8 +111,8 @@ func (s *Server) handlePost() http.HandlerFunc {
 			return
 		}
 
-		// If we successfully created/committed the db transaction, we can consider this
-		// transaction successful and return a response with the response body
+		// If we got this far, we created/committed the db transaction and can consider
+		// this transaction successful and return a response
 
 		// create a new response struct and set Audit and other
 		// relevant elements
